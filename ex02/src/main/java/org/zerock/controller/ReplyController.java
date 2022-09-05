@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.zerock.domain.Criteria;
+import org.zerock.domain.ReplyPageDTO;
 import org.zerock.domain.ReplyVO;
 import org.zerock.service.ReplyService;
 
@@ -39,11 +40,20 @@ public class ReplyController {
 
 	@GetMapping(value = "/pages/{bno}/{page}", produces = { MediaType.APPLICATION_XML_VALUE,
 			MediaType.APPLICATION_JSON_UTF8_VALUE })
-	public ResponseEntity<List<ReplyVO>> getList(@PathVariable("page") int page, @PathVariable("bno") Long bno) {
+	public ResponseEntity<ReplyPageDTO> getList(@PathVariable("page") int page, @PathVariable("bno") Long bno) {
 		System.out.println("getList : " + page + bno);
 		Criteria cri = new Criteria(page, 10);
-		System.out.println(cri);
-		return new ResponseEntity<>(service.getlList(cri, bno), HttpStatus.OK);	
+		System.out.println("cri : " + cri);
+		return new ResponseEntity<>(service.getListPage(cri, bno), HttpStatus.OK);	
+	}
+	
+	@GetMapping(value = "/{rno}",
+		produces = {MediaType.APPLICATION_XML_VALUE,
+				MediaType.APPLICATION_JSON_UTF8_VALUE
+		})
+	public ResponseEntity<ReplyVO> get(@PathVariable("rno") Long rno) {
+		System.out.println("get : "+rno);
+		return new ResponseEntity<>(service.get(rno), HttpStatus.OK);
 	}
 	
 	@DeleteMapping(value = "/{rno}", produces = {MediaType.TEXT_PLAIN_VALUE})

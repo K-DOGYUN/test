@@ -4,8 +4,11 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.zerock.domain.Criteria;
+import org.zerock.domain.ReplyPageDTO;
 import org.zerock.domain.ReplyVO;
+import org.zerock.mapper.BoardMapper;
 import org.zerock.mapper.ReplyMapper;
 
 import lombok.Setter;
@@ -16,10 +19,16 @@ import lombok.extern.log4j.Log4j;
 public class ReplyServiceImpl implements ReplyService {
 	@Setter(onMethod_ = @Autowired)
 	private ReplyMapper mapper;
-
+	
+	@Setter(onMethod_ = @Autowired)
+	private BoardMapper boardMapper;
+	
+	@Transactional
 	@Override
 	public int register(ReplyVO vo) {
 		System.out.println("register : " + vo);
+		
+		boardMapper.updateReplyCnt(vo.getBno(), 1);
 		return mapper.insert(vo);
 	}
 
@@ -34,10 +43,15 @@ public class ReplyServiceImpl implements ReplyService {
 		System.out.println("modify : " + vo);
 		return mapper.update(vo);
 	}
-
+	
+	@Transactional
 	@Override
 	public int remove(Long rno) {
 		System.out.println("remove : " + rno);
+		
+		ReplyVO vo = mapper.read(rno);
+		
+		boardMapper.updateReplyCnt(vo.getBno(), -1);
 		return mapper.delete(rno);
 	}
 
@@ -46,5 +60,11 @@ public class ReplyServiceImpl implements ReplyService {
 		System.out.println("List of bno : " + bno);
 		return mapper.getListWithPaging(cri, bno);
 	}
-
+	
+	@Override
+	public ReplyPageDTO getListPage(Criteria cri, Long bno) {
+		return new ReplyPageDTO(
+			mapper.getCountByBno(bno),
+			mapper.getListWithPaging(cri, bno));
+	}
 }
